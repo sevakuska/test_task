@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgresql:
+    image: postgres:16.2-alpine3.19
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=superhardpassword
+      - POSTGRES_DB=test_test_database
+    ports:
+      - '4000:5432'
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  migrations:
+    image: test_task
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      - DB_DSN=postgresql+asyncpg://postgres:superhardpassword@postgresql:5432/test_test_database
+  pgadmin:
+    image: dpage/pgadmin4:8.5
+    ports:
+      - '3001:80'
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+  app:
+    image: test_task
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+    restart: always
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    ports:
+      - '3000:80'
+    environment:
+      - DB_DSN=postgresql+asyncpg://postgres:superhardpassword@postgresql:5432/test_test_database
+volumes:
+  postgresql-data:
+    driver: local
