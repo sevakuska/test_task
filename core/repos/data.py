@@ -16,7 +16,7 @@ class DataRepo(BaseRepo):
         finally:
             await session.close()
 
-    async def read_all(self) -> None:
+    async def read_all(self) -> list[DataModel]:
         try:
             session = await get_database_session()
             query = select(DataModel)
