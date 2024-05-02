@@ -20,6 +20,6 @@ class DataRepo(BaseRepo):
         try:
             session = await get_database_session()
             query = select(DataModel)
-            return (i[0] for i in await session.execute(query))
+            return [i[0] for i in await session.execute(query)]
         finally:
             await session.close()
