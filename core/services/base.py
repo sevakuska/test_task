@@ -1,5 +1,5 @@
 from abc import ABC
 
 
-class BaseServ(ABC):
+class BaseService(ABC):
     ...

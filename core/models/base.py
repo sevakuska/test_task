@@ -1,6 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase
+from dataclasses import dataclass
 
 
-class BaseModel(AsyncAttrs, DeclarativeBase):
+@dataclass(frozen=True, slots=True)
+class BaseModel:
     ...
